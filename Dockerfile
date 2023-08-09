@@ -101,7 +101,7 @@ FROM shared-ecosystem AS all-in-one
 # private api stage
 # --------------------------------------------
 FROM shared-ecosystem AS private-api-backend
-RUN mkdir -p /var/www/html/var/cache/prod && chown www-data:www-data /var/www/html/apps/private-api/backend/var/cache/prod
-RUN mkdir -p /var/www/html/var/cache/test && chown www-data:www-data /var/www/html/apps/private-api/backend/var/cache/test
-RUN mkdir -p /var/www/html/var/cache/dev && chown www-data:www-data /var/www/html/apps/private-api/backend/var/cache/dev
-RUN mkdir -p /var/www/html/var/log && chown www-data:www-data /var/www/html/apps/private-api/backend/var/log
+RUN mkdir -p /var/www/html/var/cache/prod && chown www-data:www-data /var/www/html/var/cache/prod
+RUN mkdir -p /var/www/html/var/cache/test && chown www-data:www-data /var/www/html/var/cache/test
+RUN mkdir -p /var/www/html/var/cache/dev && chown www-data:www-data /var/www/html/var/cache/dev
+RUN mkdir -p /var/www/html/var/log && chown www-data:www-data /var/www/html/var/log
