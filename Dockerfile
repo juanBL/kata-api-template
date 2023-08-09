@@ -52,7 +52,4 @@ RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log 																&&	\
     setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX /var/www/html/var												&& 	\
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX /var/www/html/var													;
 
-# Expone el puerto 9000 para PHP-FPM
-EXPOSE 9000
-
 CMD ["php-fpm"]
