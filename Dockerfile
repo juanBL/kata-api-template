@@ -1,7 +1,7 @@
 FROM php:8.1-fpm-alpine
 
-#WORKDIR /var/www/html
-VOLUME /var/run/php
+WORKDIR /var/www/html
+#VOLUME /var/run/php
 
 RUN apk add --update --no-cache 																					\
     	linux-headers																								\
