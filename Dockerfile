@@ -1,6 +1,6 @@
 FROM php:8.1-fpm-alpine
 
-WORKDIR /var/www/html
+#WORKDIR /var/www/html
 VOLUME /var/run/php
 
 RUN apk add --update --no-cache 																					\
@@ -54,8 +54,5 @@ RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log 																&&	\
 
 # Expone el puerto 9000 para PHP-FPM
 EXPOSE 9000
-
-# Cambia el usuario para que coincida con el usuario del sistema Railway
-RUN usermod -u 1000 www-data
 
 CMD ["php-fpm"]
