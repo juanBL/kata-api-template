@@ -8,6 +8,8 @@ ARG COMPOSER_VERSION=2.1.8
 FROM mlocati/php-extension-installer:${PHP_EXT_INSTALLER_VERSION} AS php-extension-installer
 FROM php:${PHP_VERSION} AS base
 
+VOLUME /var/run/php
+
 COPY --from=php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
 RUN apk add --update --no-cache \
