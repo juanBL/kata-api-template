@@ -11,7 +11,7 @@ services:
     volumes:
       - api-php_socket:/var/run/php
       - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./public:/srv/app/public:ro
+      - ./public:/var/www/html/public:ro
     ports:
       - "8080:8080"
 
@@ -25,7 +25,7 @@ services:
       - skeleton-php-symfony-postgres
     volumes:
       - api-php_socket:/var/run/php
-      - ./:/srv/app:rw
+      - ./:/var/www/html:rw
       - ./docker/php/conf.d/symfony.dev.ini:/usr/local/etc/php/conf.d/symfony.ini
   
   skeleton-php-symfony-postgres:
