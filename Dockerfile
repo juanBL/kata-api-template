@@ -1,109 +1,56 @@
-ARG PHP_VERSION="8.2.7-fpm-alpine"
-ARG PHP_EXT_INSTALLER_VERSION=2.1.10
-ARG COMPOSER_VERSION=2.1.8
-
-# --------------------------------------------
-# base stage
-# --------------------------------------------
-FROM mlocati/php-extension-installer:${PHP_EXT_INSTALLER_VERSION} AS php-extension-installer
-FROM php:${PHP_VERSION} AS base
+FROM php:8.1-fpm-alpine
 
 VOLUME /var/run/php
 
-COPY --from=php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+RUN apk add --update --no-cache 																					\
+    	linux-headers																								\
+		acl 																										\
+		fcgi 																										\
+		file 																										\
+		gettext 																									\
+		git 																										\
+		gnu-libiconv 																								\
+																													;
 
-RUN apk add --update --no-cache \
-    bash \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN set -eux; 																										\
+	apk add --no-cache --virtual .build-deps 																		\
+		$PHPIZE_DEPS 																								\
+		icu-dev 																									\
+		libzip-dev 																									\
+		zlib-dev 																									\
+																													;
 
-RUN install-php-extensions \
-    amqp \
-    bcmath \
-    gmp \
-    intl \
-    pdo \
-    pgsql \
-    pdo_pgsql \
-    redis \
-    zip
+RUN docker-php-ext-configure zip 																				&&  \
+	docker-php-ext-install -j$(nproc) 																				\
+		intl 																										\
+		zip 																										\
+																													;
 
-RUN curl -sS https://get.symfony.com/cli/installer | bash && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
-RUN curl -L https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/v0.5.0/php-fpm-healthcheck -o /usr/local/bin/php-fpm-healthcheck \
-    && chmod +x /usr/local/bin/php-fpm-healthcheck
+RUN pecl install 																									\
+		apcu-5.1.21 																							&& 	\
+	pecl clear-cache 																							&&	\
+	docker-php-ext-enable 																							\
+		apcu 																										\
+		opcache 																									\
+																													;
 
-COPY deployments/docker/php/php.ini $PHP_INI_DIR/conf.d/php.ini
-COPY deployments/docker/php/opcache-runtime.ini $PHP_INI_DIR/conf.d/opcache.ini
-COPY deployments/docker/php/fpm.conf /usr/local/etc/php-fpm.d/zz-docker.conf
-COPY deployments/docker/php/apcu.ini $PHP_INI_DIR/conf.d/apcu.ini
+RUN pecl install xdebug 																						&& \
+	docker-php-ext-enable xdebug																					;
 
-# --------------------------------------------
-# builder stage
-# --------------------------------------------
-FROM composer:${COMPOSER_VERSION} AS composer
-FROM base AS builder
+COPY docker/php/conf.d/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+COPY docker/php/php-fpm.d/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
-COPY --from=composer /usr/bin/composer /usr/local/bin
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN apk add --no-cache --virtual .pgsql-deps postgresql-dev; \
+	docker-php-ext-install -j$(nproc) pdo_pgsql; \
 	apk add --no-cache --virtual .pgsql-rundeps so:libpq.so.5; \
 	apk del .pgsql-deps
-# --------------------------------------------
-# dev stage
-# --------------------------------------------
-FROM builder AS development
 
-ARG USER_ID=1000
+RUN mkdir -p /srv/app/var/cache /srv/app/var/log 																&&	\
+    setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX /srv/app/var												&& 	\
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX /srv/app/var													;
 
-COPY deployments/docker/php/opcache-development.ini $PHP_INI_DIR/conf.d/opcache.ini
-RUN install-php-extensions \
-    xdebug
+WORKDIR /srv/app
 
-COPY deployments/docker/php/xdebug.ini $PHP_INI_DIR/conf.d
-COPY deployments/docker/php/disable_xdebug.sh /usr/local/bin/disable_xdebug
-COPY deployments/docker/php/enable_xdebug.sh /usr/local/bin/enable_xdebug
-
-RUN chmod u+x /usr/local/bin/disable_xdebug /usr/local/bin/enable_xdebug
-
-# --------------------------------------------
-# installer stage
-# --------------------------------------------
-FROM builder AS installer
-
-COPY composer.json .
-COPY composer.lock .
-
-RUN composer install \
-    --no-interaction \
-    --no-progress \
-    --no-ansi \
-    # --no-dev \
-    --ignore-platform-reqs \
-    && chown -R www-data: .
-
-# --------------------------------------------
-# shared stage
-# --------------------------------------------
-FROM base AS shared-ecosystem
-
-COPY . /var/www/html
-COPY --from=installer /var/www/html /var/www/html
-
-RUN mkdir -p /var/www/html/var/cache/test && chown www-data:www-data /var/www/html/var/cache/test
-RUN mkdir -p /var/www/html/var/log && chown www-data:www-data /var/www/html/var/log
-RUN chown -R www-data:www-data /var/www/html/var
-
-
-# --------------------------------------------
-# all-in-one stage
-# --------------------------------------------
-FROM shared-ecosystem AS all-in-one
-
-# --------------------------------------------
-# private api stage
-# --------------------------------------------
-FROM shared-ecosystem AS private-api-backend
-RUN mkdir -p /var/www/html/var/cache/prod && chown www-data:www-data /var/www/html/var/cache/prod
-RUN mkdir -p /var/www/html/var/cache/test && chown www-data:www-data /var/www/html/var/cache/test
-RUN mkdir -p /var/www/html/var/cache/dev && chown www-data:www-data /var/www/html/var/cache/dev
-RUN mkdir -p /var/www/html/var/log && chown www-data:www-data /var/www/html/var/log
+CMD ["php-fpm"]
