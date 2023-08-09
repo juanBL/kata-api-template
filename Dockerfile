@@ -1,6 +1,6 @@
 FROM php:8.1-fpm-alpine
 
-VOLUME /var/run/php
+#VOLUME /var/run/php
 
 RUN apk add --update --no-cache 																					\
     	linux-headers																								\
