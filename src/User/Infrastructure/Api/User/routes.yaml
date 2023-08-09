@@ -1,0 +1,19 @@
+PostUser:
+    path: /
+    controller: App\User\Infrastructure\Api\User\PostUserController
+    methods: [ POST ]
+
+DeleteUser:
+    path: /{id}
+    controller: App\User\Infrastructure\Api\User\DeleteUserController
+    methods: [ DELETE ]
+
+AddUserToGroup:
+    path: /{userId}/groups/{groupId}
+    controller: App\User\Infrastructure\Api\User\PostUserGroupController
+    methods: [ POST ]
+
+DeleteUserToGroup:
+    path: /{userId}/groups/{groupId}
+    controller: App\User\Infrastructure\Api\User\DeleteUserGroupController
+    methods: [ DELETE ]

@@ -1,0 +1,31 @@
+version: '3.7'
+
+services:
+  private_api_backend_php:
+    container_name: private_api_backend_php
+    build:
+      target: development
+      context: .
+      dockerfile: Dockerfile
+      cache_from:
+        - "all-in-one:latest"
+    restart: unless-stopped
+    ports:
+      - "8050:8050"
+      - "9050:9001"
+    volumes:
+      - .:/var/www/html/:delegated
+    command: symfony serve --dir=public --port=8050
+  
+  skeleton-php-symfony-postgres:
+    container_name: skeleton-php-symfony-postgres
+    image: postgres:14-alpine
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"

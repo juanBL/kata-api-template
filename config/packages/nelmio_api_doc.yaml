@@ -1,0 +1,14 @@
+nelmio_api_doc:
+  use_validation_groups: true
+  documentation:
+    servers:
+      - url: http://localhost:8080/
+        description: API over HTTP
+    info:
+      title: API
+      description: This is a private API.
+      version: 1.0.0
+  areas:
+    path_patterns: # an array of regexps (document only routes under /api, except /api/doc)
+      - ^/api(?!/doc$)
+      - ^/webhook(?!/doc$)

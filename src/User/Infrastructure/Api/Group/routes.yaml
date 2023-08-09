@@ -1,0 +1,9 @@
+PostGroup:
+    path: /
+    controller: App\User\Infrastructure\Api\Group\PostGroupController
+    methods: [ POST ]
+
+DeleteGroup:
+    path: /{id}
+    controller: App\User\Infrastructure\Api\Group\DeleteGroupController
+    methods: [ DELETE ]

@@ -1,0 +1,12 @@
+parameters:
+    level: 9
+    checkGenericClassInNonGenericObjectType: false
+    paths:
+        - src
+    excludePaths:
+        - src/Shared/*
+    ignoreErrors:
+        - '/Generator expects value type Symfony\\Component\\HttpKernel\\Bundle\\BundleInterface\, object given\./'
+        - '/Cannot cast mixed to string\./'
+        - '/Cannot cast mixed to int\./'
+        - '/non-empty-string, string given\./'

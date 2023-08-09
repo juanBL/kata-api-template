@@ -1,0 +1,25 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+    _instanceof:
+        App\Shared\Domain\Bus\Event\DomainEventSubscriber:
+            tags: [ 'app.domain_event_subscriber' ]
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+    
+    Doctrine\Migrations\Tools\Console\Command\:
+        resource: '../vendor/doctrine/migrations/lib/Doctrine/Migrations/Tools/Console/Command'
+        tags: [ 'console.command' ]
+    
+    App\Shared\Infrastructure\Bus\Event\InMemory\InMemorySymfonyEventBus:
+        arguments: [ !tagged app.domain_event_subscriber ]
+        lazy: true
+    
+    App\Shared\Domain\Bus\Event\EventBus: '@App\Shared\Infrastructure\Bus\Event\InMemory\InMemorySymfonyEventBus'
+
+    App\Shared\Infrastructure\Symfony\ApiExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, method: onException }

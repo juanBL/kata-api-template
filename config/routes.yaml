@@ -1,0 +1,23 @@
+app.swagger_ui:
+    path: /api/doc
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
+    
+Health:
+    prefix: /api/health
+    resource: ../src/Health/Infrastructure/Api/routes.yaml
+    trailing_slash_on_root: false
+    
+User:
+    prefix: /api/users
+    resource: ../src/User/Infrastructure/Api/User/routes.yaml
+    trailing_slash_on_root: false
+    
+Group:
+    prefix: /api/groups
+    resource: ../src/User/Infrastructure/Api/Group/routes.yaml
+    trailing_slash_on_root: false
+    
+kernel:
+    resource: ../src/Kernel.php
+    type: annotation

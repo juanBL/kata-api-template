@@ -1,0 +1,32 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        mapping_types:
+            enum: string
+        types:
+            user_id: App\User\Infrastructure\Repository\Doctrine\UserIdType
+            group_id: App\User\Infrastructure\Repository\Doctrine\GroupIdType
+            user_group_id: App\User\Infrastructure\Repository\Doctrine\UserGroupIdType
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            User:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/config/doctrine/mapping/User'
+                prefix: 'App\User\Domain\Model'
+                alias: User
+            UserValueObject:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/config/doctrine/mapping/User/User'
+                prefix: 'App\User\Domain\Model\User'
+                alias: UserValueObject
+            GroupValueObject:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/config/doctrine/mapping/User/Group'
+                prefix: 'App\User\Domain\Model\Group'
+                alias: GroupValueObject
